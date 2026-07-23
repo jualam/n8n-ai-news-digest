@@ -20,9 +20,8 @@ TechCrunch AI provides timely reporting on product launches, funding, and major 
 
 ## Tools Used
 
-- n8n AI Workflow Builder — created the initial workflow scaffold from my architecture prompt.
 - OpenAI GPT-5.5 through n8n Connect — analyzed the live articles and generated the structured digest.
-- ChatGPT — provided limited implementation guidance and troubleshooting.
+- ChatGPT — helped troubleshoot the Slack OAuth connection and check the final formatting.
 
 I reviewed, customized, and tested the complete workflow, including preprocessing, source balancing, structured output, and Slack delivery.
 
