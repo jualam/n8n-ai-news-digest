@@ -1,0 +1,409 @@
+{
+  "name": "AI & Automation Weekly Intelligence Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "9ea19feb-c8a8-421b-a177-374288d4071b",
+      "name": "Every Monday 9AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (compatible; n8n-DigestBot/1.0)"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "51a0f69d-f241-4bec-9cf2-9160665174be",
+      "name": "Fetch TechCrunch AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        0
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {
+          "explicitArray": false,
+          "mergeAttrs": true,
+          "normalize": true,
+          "trim": true
+        }
+      },
+      "id": "89c7e939-2edd-48f0-b6bd-c66fc3b3b8f2",
+      "name": "Parse TechCrunch XML",
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const LF = String.fromCharCode(10);\nconst SOURCE = \"TechCrunch AI\";\nconst out = [];\nfor (const item of $input.all()) {\n  const root = (item.json && item.json.rss) ? item.json.rss : item.json;\n  const channel = root && root.channel ? root.channel : null;\n  if (!channel || !channel.item) continue;\n  let entries = channel.item;\n  if (!Array.isArray(entries)) entries = [entries];\n  for (const e of entries) {\n    if (!e) continue;\n    let link = e.link;\n    if (link && typeof link === \"object\") link = link._ || link.href || \"\";\n    out.push({\n      json: {\n        title: (e.title || \"\").toString(),\n        link: (link || \"\").toString(),\n        pubDate: (e.pubDate || e.pubdate || e.published || \"\").toString(),\n        description: (e.description || e[\"content:encoded\"] || \"\").toString(),\n        source: SOURCE,\n      },\n    });\n  }\n}\nreturn out;"
+      },
+      "id": "423d0358-6dce-4411-9d8b-edf6e6c25b43",
+      "name": "Extract TechCrunch Articles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "928063f2-665b-4c33-a90f-c1955b5b3d0d",
+      "name": "Merge Articles",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://venturebeat.com/category/ai/feed/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (compatible; n8n-DigestBot/1.0)"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "be7f9f95-fdb9-4942-918a-3a64b050dd24",
+      "name": "Fetch VentureBeat AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        192
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {
+          "explicitArray": false,
+          "mergeAttrs": true,
+          "normalize": true,
+          "trim": true
+        }
+      },
+      "id": "1a345dd0-88d0-41c5-b521-e0322052e151",
+      "name": "Parse VentureBeat XML",
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        448,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const SOURCE = \"VentureBeat AI\";\nconst out = [];\nfor (const item of $input.all()) {\n  const root = (item.json && item.json.rss) ? item.json.rss : item.json;\n  const channel = root && root.channel ? root.channel : null;\n  if (!channel || !channel.item) continue;\n  let entries = channel.item;\n  if (!Array.isArray(entries)) entries = [entries];\n  for (const e of entries) {\n    if (!e) continue;\n    let link = e.link;\n    if (link && typeof link === \"object\") link = link._ || link.href || \"\";\n    out.push({\n      json: {\n        title: (e.title || \"\").toString(),\n        link: (link || \"\").toString(),\n        pubDate: (e.pubDate || e.pubdate || e.published || \"\").toString(),\n        description: (e.description || e[\"content:encoded\"] || \"\").toString(),\n        source: SOURCE,\n      },\n    });\n  }\n}\nreturn out;"
+      },
+      "id": "df82b44f-2480-4e54-b7f4-39f78e852063",
+      "name": "Extract VentureBeat Articles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const LF = String.fromCharCode(10);\nconst items = $input.all();\n\nfunction stripHtml(s) {\n  if (!s) return \"\";\n\n  let t = String(s);\n\n  t = t.replace(/<[^>]*>/g, \" \");\n  t = t\n    .replace(/&nbsp;/g, \" \")\n    .replace(/&amp;/g, \"&\")\n    .replace(/&quot;/g, '\"')\n    .replace(/&#039;/g, \"'\")\n    .replace(/&#39;/g, \"'\")\n    .replace(/&lt;/g, \"<\")\n    .replace(/&gt;/g, \">\");\n\n  return t.replace(/\\s+/g, \" \").trim();\n}\n\nfunction normUrl(u) {\n  if (!u) return \"\";\n\n  let s = String(u).trim().toLowerCase();\n  s = s.split(\"#\")[0].split(\"?\")[0];\n\n  return s.replace(/\\/$/, \"\");\n}\n\nfunction normTitleKey(t) {\n  if (!t) return \"\";\n\n  return String(t)\n    .toLowerCase()\n    .replace(/[^a-z0-9 ]/g, \" \")\n    .replace(/\\s+/g, \" \")\n    .trim();\n}\n\nconst now = Date.now();\nconst WEEK_MS = 7 * 24 * 60 * 60 * 1000;\n\nlet articles = [];\n\nfor (const item of items) {\n  const data = item.json || {};\n\n  if (!data.title && !data.link) continue;\n\n  const title = String(data.title || \"\").trim();\n  const link = String(data.link || \"\").trim();\n\n  if (!title && !link) continue;\n\n  let timestamp = null;\n\n  if (data.pubDate) {\n    const parsedDate = Date.parse(data.pubDate);\n\n    if (!Number.isNaN(parsedDate)) {\n      timestamp = parsedDate;\n    }\n  }\n\n  articles.push({\n    title,\n    link,\n    pubDate: String(data.pubDate || \"\"),\n    ts: timestamp,\n    description: stripHtml(data.description).slice(0, 1200),\n    source: String(data.source || \"Unknown Source\").trim(),\n  });\n}\n\n// Keep articles from the last seven days.\n// Retain undated articles so a missing date does not break the digest.\narticles = articles.filter((article) => {\n  return article.ts === null || now - article.ts <= WEEK_MS;\n});\n\n// Remove duplicates based on normalized URL or title.\nconst seenUrls = new Set();\nconst seenTitles = new Set();\nconst deduped = [];\n\nfor (const article of articles) {\n  const urlKey = normUrl(article.link);\n  const titleKey = normTitleKey(article.title);\n\n  if (urlKey && seenUrls.has(urlKey)) continue;\n  if (titleKey && seenTitles.has(titleKey)) continue;\n\n  if (urlKey) seenUrls.add(urlKey);\n  if (titleKey) seenTitles.add(titleKey);\n\n  deduped.push(article);\n}\n\n// Sort every source newest-first.\ndeduped.sort((a, b) => {\n  const aTime = a.ts === null ? -Infinity : a.ts;\n  const bTime = b.ts === null ? -Infinity : b.ts;\n\n  return bTime - aTime;\n});\n\n// Group articles by source.\nconst articlesBySource = new Map();\n\nfor (const article of deduped) {\n  const sourceKey = article.source || \"Unknown Source\";\n\n  if (!articlesBySource.has(sourceKey)) {\n    articlesBySource.set(sourceKey, []);\n  }\n\n  articlesBySource.get(sourceKey).push(article);\n}\n\n// Select articles in rounds across sources.\n// This prevents one high-volume feed from occupying all 15 positions.\nconst sourceGroups = [...articlesBySource.values()];\nconst limited = [];\nlet sourceIndex = 0;\n\nwhile (limited.length < 15) {\n  let articleAdded = false;\n\n  for (const group of sourceGroups) {\n    if (sourceIndex < group.length && limited.length < 15) {\n      limited.push(group[sourceIndex]);\n      articleAdded = true;\n    }\n  }\n\n  if (!articleAdded) break;\n\n  sourceIndex++;\n}\n\n// Return the balanced selection in newest-first order.\nlimited.sort((a, b) => {\n  const aTime = a.ts === null ? -Infinity : a.ts;\n  const bTime = b.ts === null ? -Infinity : b.ts;\n\n  return bTime - aTime;\n});\n\n// Create a compact text representation for the OpenAI node.\nconst lines = [];\n\nfor (let i = 0; i < limited.length; i++) {\n  const article = limited[i];\n\n  lines.push(`Article ${i + 1}`);\n  lines.push(`Title: ${article.title}`);\n  lines.push(`Source: ${article.source}`);\n  lines.push(`Published: ${article.pubDate || \"unknown\"}`);\n  lines.push(`URL: ${article.link}`);\n  lines.push(`Description: ${article.description}`);\n  lines.push(\"\");\n}\n\nconst combined_articles = lines.join(LF);\n\nreturn [\n  {\n    json: {\n      count: limited.length,\n      articles: limited,\n      combined_articles,\n    },\n  },\n];"
+      },
+      "id": "a50c9d74-8507-43c5-b929-1aedec102a19",
+      "name": "Prepare and Deduplicate Articles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.5",
+          "mode": "list",
+          "cachedResultName": "GPT-5.5"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Here are this week's articles to analyze:{{ \"\\n\\n\" }}{{ $json.combined_articles }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "instructions": "You are an industry intelligence analyst for FocusKPI, an AI consulting and transformation company.\n\nYou will receive a list of recent news articles about AI and automation.\n\nFrom ONLY the supplied articles, identify the 3 to 5 most strategically significant developments relevant to:\nAI agents, enterprise automation, data analytics, business intelligence, AI governance, or applied AI products.\n\nRules:\n- Return between 3 and 5 takeaways, never fewer than 3 and never more than 5.\n- Deduplicate overlapping coverage of the same development into a single takeaway.\n- Rely ONLY on the supplied articles. Do not invent facts, sources, statistics, or URLs.\n- For every takeaway, use the real source and URL from its supplied article.\n- When both sources contain strategically relevant unique stories, include at least one takeaway from each source.\n- Do not select a weaker story solely to satisfy source diversity.\n- Explain why each development matters specifically to an AI consulting and transformation company such as FocusKPI.\n- Each headline must contain no more than 12 words.\n- Each summary must be exactly one concise sentence containing no more than 35 words.\n- Each why_it_matters value must be exactly one concise sentence containing no more than 35 words.\n- The executive_summary must contain exactly 2 concise sentences summarizing the week for a FocusKPI executive audience.\n- The week_of value must contain only the Monday date for the current digest week, such as \"July 20, 2026\".\n- Do not include the words \"Week of\" in the week_of value.\n- Keep the complete response concise enough to fit within one Slack message.\n\nRespond strictly according to the provided JSON schema.",
+          "maxTokens": 2500,
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "weekly_digest",
+              "schema": "{\"type\":\"object\",\"properties\":{\"digest_title\":{\"type\":\"string\"},\"week_of\":{\"type\":\"string\"},\"executive_summary\":{\"type\":\"string\"},\"takeaways\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"headline\":{\"type\":\"string\"},\"summary\":{\"type\":\"string\"},\"why_it_matters\":{\"type\":\"string\"},\"source_name\":{\"type\":\"string\"},\"source_url\":{\"type\":\"string\"}},\"required\":[\"headline\",\"summary\",\"why_it_matters\",\"source_name\",\"source_url\"],\"additionalProperties\":false}}},\"required\":[\"digest_title\",\"week_of\",\"executive_summary\",\"takeaways\"],\"additionalProperties\":false}",
+              "strict": true
+            }
+          }
+        }
+      },
+      "id": "482d2808-3dd4-4be3-b9ac-083c330b147e",
+      "name": "Analyze Articles (OpenAI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        1344,
+        96
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "n8n Connect",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const LF = String.fromCharCode(10);\nconst item = $input.first();\nlet payload = null;\ntry {\n  const out = item.json.output;\n  if (Array.isArray(out) && out[0] && Array.isArray(out[0].content) && out[0].content[0]) {\n    const txt = out[0].content[0].text;\n    payload = (typeof txt === \"string\") ? JSON.parse(txt) : txt;\n  } else if (item.json.digest_title) {\n    payload = item.json;\n  }\n} catch (e) {\n  payload = null;\n}\nif (!payload) {\n  payload = { digest_title: \"AI & Automation Weekly Intelligence Digest\", week_of: \"\", executive_summary: \"No digest content could be generated this week.\", takeaways: [] };\n}\n\nconst title = payload.digest_title || \"AI & Automation Weekly Intelligence Digest\";\nconst weekOf = payload.week_of || \"\";\nconst summary = payload.executive_summary || \"\";\nconst takeaways = Array.isArray(payload.takeaways) ? payload.takeaways : [];\n\nconst lines = [];\nlines.push(\"*AI & Automation Weekly Intelligence Digest*\");\nif (weekOf) lines.push(\"_Week of \" + weekOf + \"_\");\nlines.push(\"\");\nif (summary) { lines.push(summary); lines.push(\"\"); }\nfor (let i = 0; i < takeaways.length; i++) {\n  const t = takeaways[i] || {};\n  const headline = t.headline || \"Untitled\";\n  lines.push((i + 1) + \". *\" + headline + \"*\");\n  if (t.summary) lines.push(\"   \" + t.summary);\n  if (t.why_it_matters) lines.push(\"   *Why it matters:* \" + t.why_it_matters);\n  if (t.source_url) {\n    lines.push(\"   <\" + t.source_url + \"|\" + (t.source_name || \"Source\") + \">\");\n  } else if (t.source_name) {\n    lines.push(\"   Source: \" + t.source_name);\n  }\n  lines.push(\"\");\n}\nlines.push(\"_This digest was automatically compiled from TechCrunch AI and VentureBeat AI._\");\n\nconst markdown = lines.join(LF);\nreturn [{ json: { markdown: markdown } }];"
+      },
+      "id": "cbc371a0-e5ad-4d34-a1c8-99954288cb5b",
+      "name": "Format Markdown Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#all-juhair-ai-projects",
+          "mode": "name"
+        },
+        "text": "={{ $json.markdown }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "mrkdwn": true,
+          "unfurl_links": false,
+          "unfurl_media": false
+        }
+      },
+      "id": "6e0df5d8-1430-4114-9785-831103d691c0",
+      "name": "Send Digest to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1792,
+        96
+      ],
+      "webhookId": "28f05e2f-92b1-433a-8001-4adad73c7a96",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "XQAUkzh70V6zQCbS",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every Monday 9AM": {
+      "main": [
+        [
+          {
+            "node": "Fetch TechCrunch AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch VentureBeat AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch TechCrunch AI": {
+      "main": [
+        [
+          {
+            "node": "Parse TechCrunch XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse TechCrunch XML": {
+      "main": [
+        [
+          {
+            "node": "Extract TechCrunch Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract TechCrunch Articles": {
+      "main": [
+        [
+          {
+            "node": "Merge Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Articles": {
+      "main": [
+        [
+          {
+            "node": "Prepare and Deduplicate Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch VentureBeat AI": {
+      "main": [
+        [
+          {
+            "node": "Parse VentureBeat XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse VentureBeat XML": {
+      "main": [
+        [
+          {
+            "node": "Extract VentureBeat Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract VentureBeat Articles": {
+      "main": [
+        [
+          {
+            "node": "Merge Articles",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Prepare and Deduplicate Articles": {
+      "main": [
+        [
+          {
+            "node": "Analyze Articles (OpenAI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Articles (OpenAI)": {
+      "main": [
+        [
+          {
+            "node": "Format Markdown Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Markdown Digest": {
+      "main": [
+        [
+          {
+            "node": "Send Digest to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timezone": "America/New_York"
+  },
+  "versionId": "454c771c-1748-4d92-b59e-cc53136d7a1a",
+  "meta": {
+    "instanceId": "ef57a550efe3340ac1c32fc299078e727f482f899148db1652a5be29c4175d13"
+  },
+  "nodeGroups": [],
+  "id": "uzjkrDTfnSRl53ea",
+  "tags": []
+}
