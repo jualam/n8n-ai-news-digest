@@ -18,6 +18,14 @@ The workflow runs every Monday at 9:00 AM Eastern Time and:
 
 TechCrunch AI provides timely reporting on product launches, funding, and major industry developments, while VentureBeat provides deeper enterprise coverage of AI infrastructure, agents, security, evaluation, and governance. The preprocessing stage removes HTML, filters articles to the previous seven days, deduplicates URLs and titles, balances both sources, and caps description length to control token usage. The OpenAI node returns strict structured JSON and is instructed to use only supplied articles, include real source URLs, and explain why each development matters to an AI consulting company. The final Slack digest contains a two-sentence executive summary and 3–5 concise takeaways with source links.
 
+## Tools Used
+
+- n8n AI Workflow Builder — created the initial workflow scaffold from my architecture prompt.
+- OpenAI GPT-5.5 through n8n Connect — analyzed the live articles and generated the structured digest.
+- ChatGPT — provided limited implementation guidance and troubleshooting.
+
+I reviewed, customized, and tested the complete workflow, including preprocessing, source balancing, structured output, and Slack delivery.
+
 ## Import and Setup
 
 1. Download [`AI & Automation Weekly Intelligence Digest.json`](./AI%20%26%20Automation%20Weekly%20Intelligence%20Digest.json).
